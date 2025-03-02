@@ -1,23 +1,23 @@
 const express=require('express')
 const mongoose=require('mongoose')
 require('dotenv').config()
-const User=require('../models/user')
-const Recipe=require('../models/recipe')
+const User=require('./models/user')
+const Recipe=require('./models/recipe')
+const cors = require('cors');
 
 
-
-const app=express()
-const PORT=3000
+const app=express();
+const PORT=3000;
 app.use(express.json());
 app.use(cors());
 
 
 
 // auth for user login and registration
-app.use("/auth",require('../routes/authRt'))
+app.use("/auth",require('./routes/authrt'))
 
 //recipe for recipe add , update , delete  and get all for recipes
-app.use("/recipe",require('../routes/recipeRt'))
+app.use("/recipe",require('./routes/recipeRt'))
 
 
 
@@ -27,6 +27,7 @@ mongoose.connect(process.env.MONGO_URL).then(
 ).catch(
     (err)=>console.log(err)
 )
+
 
 app.listen(PORT,(err)=>{
     if(err)
