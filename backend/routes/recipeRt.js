@@ -84,7 +84,7 @@ router.get("/search",async (req,res)=>{
             {username:{$regex:query,$options:'i'}}
            ]
         }
-        ).select("title image createdByName updatedAt instructions")\
+        ).select("title image createdByName updatedAt instructions")
 
 
         // check whether search quert  exists 
