@@ -24,11 +24,17 @@ try{
         const hashedPassword= await bcrypt.hash(password,10)
         const user=new User({username,email,password:hashedPassword})
         await user.save()
-        res.json({message: "User Registred Successfully"})
+        .then(()=>{
+            res.json({message: "User Registred Successfully"})
         console.log("User Registration done")
-    }
-    }
-   
+        })
+        .catch((err)=>{
+             console.log(err)    
+        
+    
+    })
+}
+}
 catch(err)
 {
     console.log(err)

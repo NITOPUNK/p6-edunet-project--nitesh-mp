@@ -13,7 +13,12 @@ router.post("/add",async (req,res)=>{
     try{
         const newRecipe=new recipe({title,description,ingredients,instructions,category,image,username})
         await newRecipe.save()
+        .then(()=>{
         res.json({message:"Recipe added successfully"})
+        })
+        .catch((err)=>{
+            console.log(err)
+        })
     }
     catch(err)
     {
@@ -28,7 +33,12 @@ router.post("/update",async (req,res)=>{
     const {id,title,description,ingredients,instructions,category,image,username}=req.body;
     try{
         await recipe.findOneAndUpdate({_id:id},{title,description,ingredients,instructions,category,image,username})
+        .then(()=>{
         res.json({message:"Recipe updated successfully"})
+        })
+        .catch((err)=>{
+            console.log(err)
+        })
     }
     catch(err)
     {
@@ -44,7 +54,12 @@ router.delete("/delete",async (req,res)=>{
     const id=req.query.id;
     try{
         await recipe.findByIdAndDelete(id)
+        .then(()=>{
         res.json({message:"Recipe deleted successfully"})
+        })
+        .catch((err)=>{
+            console.log(err)
+        })
     }
     catch(err)
     {
