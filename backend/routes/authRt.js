@@ -21,18 +21,13 @@ try{
     if (userExists) return res.status(400).json({ message: "User already exists" });
     else
     {
-        const hashedPassword= await bcrypt.hash(password,10)
-        const user=new User({username,email,password:hashedPassword})
-        await user.save()
-        .then(()=>{
-            res.json({message: "User Registred Successfully"})
-        console.log("User Registration done")
-        })
-        .catch((err)=>{
-             console.log(err)    
-        
+        const hashedPassword= await bcrypt.hash(password,10);
+        const user=new User({username,email,password:hashedPassword});
+        await user.save();
+        res.json({message: "User Registred Successfully"});
+        console.log("User Registration done");
+   
     
-    })
 }
 }
 catch(err)

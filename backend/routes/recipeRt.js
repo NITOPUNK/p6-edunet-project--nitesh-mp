@@ -16,7 +16,7 @@ router.post("/add",async (req,res)=>{
         .then(()=>{
         res.json({message:"Recipe added successfully"})
         })
-        .catch((err)=>{
+         .catch((err)=>{
             console.log(err)
         })
     }
