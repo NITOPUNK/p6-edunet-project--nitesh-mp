@@ -71,17 +71,14 @@ router.delete("/delete",async (req,res)=>{
 
 
 
-// to get all the recipes to dispaly on the diacover page 
-
-
-router.get("/discover",async (req,res)=>{    
-    try{
-        const allRecipes=await recipe.find()
-        res.json(allRecipes)
-    }
-    catch(err)
-    {
-        console.log(err)
+// to get all the recipes to display on the discover page
+router.get("/discover", async (req, res) => {
+    try {
+        const allRecipes = await recipe.find();
+        res.status(200).json(allRecipes);
+    } catch (err) {
+        console.log(err);
+        res.status(500).json({ message: "An error occurred while fetching recipes" });
     }
 });
 
@@ -120,7 +117,6 @@ router.get("/search",async (req,res)=>{
 
 
 });
-
 
 
 
