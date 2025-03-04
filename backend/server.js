@@ -14,10 +14,10 @@ app.use(cors());
 
 
 // auth for user login and registration
-app.use("/auth",require('./routes/authrt'))
+app.use("/auth",require('./routes/auth'))
 
 //recipe for recipe add , update , delete ,search   and get all for recipes
-app.use("/recipe",require('./routes/recipeRt'))
+app.use("/recipe",require('./routes/recipe'))
 
 
 
