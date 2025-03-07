@@ -1,15 +1,23 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import axios from 'axios';
 import Carosoul from '../components/Carosoul';
-import image1 from "../components/i.jpeg";
 
 const Discover = () => {
-  // Sample data
-  const recipes = [
-    { id: 1, title: "Pasta", image: image1, description: "A delicious Italian pasta dish." },
-    { id: 2, title: "Paneer Curry", image: image1, description: "A flavorful Indian-style curry." },
-    { id: 3, title: "Chocolate Cake", image: image1, description: "Rich and moist chocolate cake." }
-  ];
+  const [recipes, setRecipes] = useState([]);
+
+  useEffect(() => {
+    const fetchRecipes = async () => {
+      try {
+        const response = await axios.get("https://mern-recipe-app1-server.onrender.com/recipe/discover");
+        setRecipes(response.data);
+      } catch (error) {
+        console.error("Error fetching recipes:", error);
+      }
+    };
+
+    fetchRecipes();
+  }, []);
 
   return (
     <>
@@ -18,17 +26,17 @@ const Discover = () => {
         <h2 className="text-center mb-4">Discover Recipes</h2>
         <div className="row">
           {recipes.map((recipe) => (
-            <div className="col-md-4" key={recipe.id}>
+            <div className="col-md-4" key={recipe._id}>
               <div className="card shadow-sm mb-4">
                 <img src={recipe.image} className="card-img-top" alt={recipe.title} />
                 <div className="card-body">
                   <h5 className="card-title">{recipe.title}</h5>
                   <p className="card-text">{recipe.description}</p>
-                  <Link to={`/view-recipe/${recipe.id}`} className="btn btn-primary w-100">
+                  <Link to={`/view-recipe/${recipe._id}`} className="btn btn-primary w-100">
                     View Recipe
                   </Link>
                 </div>
-                <div className="card-footer text-muted">Last updated 3 mins ago</div>
+                <div className="card-footer text-muted">Created by {recipe.username}</div>
               </div>
             </div>
           ))}

@@ -1,4 +1,7 @@
 import React, { useState } from "react";
+import axios from "axios";
+import { useNavigate } from "react-router-dom";
+import { useCookies } from "react-cookie";
 
 const CreateRecipe = () => {
   const [recipeData, setRecipeData] = useState({
@@ -8,6 +11,8 @@ const CreateRecipe = () => {
     category: "",
     image: null,
   });
+  const [cookies] = useCookies(["access_token"]);
+  const navigate = useNavigate();
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -18,10 +23,31 @@ const CreateRecipe = () => {
     setRecipeData({ ...recipeData, image: e.target.files[0] });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Recipe Submitted:", recipeData);
-    alert("Recipe submitted successfully!");
+
+    const formData = new FormData();
+    formData.append("title", recipeData.title);
+    formData.append("ingredients", recipeData.ingredients.split(","));
+    formData.append("instructions", recipeData.instructions);
+    formData.append("category", recipeData.category);
+    formData.append("image", recipeData.image);
+    formData.append("createdBy", window.localStorage.getItem("userID"));
+    formData.append("createdByName", window.localStorage.getItem("username"));
+
+    try {
+      await axios.post("https://mern-recipe-app1-server.onrender.com/recipe/add", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+          Authorization: `Bearer ${cookies.access_token}`,
+        },
+      });
+      alert("Recipe submitted successfully!");
+      navigate("/");
+    } catch (error) {
+      console.error("Error submitting recipe:", error);
+      alert("Failed to submit recipe. Please try again.");
+    }
   };
 
   return (

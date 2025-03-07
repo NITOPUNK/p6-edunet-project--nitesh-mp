@@ -1,18 +1,42 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import axios from "axios";
 import { useParams, useNavigate } from "react-router-dom";
+import { useCookies } from "react-cookie";
 
 const EditRecipe = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const [cookies] = useCookies(["access_token"]);
 
   const [recipeData, setRecipeData] = useState({
-    title: "Sample Recipe",
-    ingredients: " previously Listed ingredients here...",
-    instructions: "previous instructions here...",
-    category: "Dinner",
-    image: null, 
-    imagePreview: "", 
+    title: "",
+    ingredients: "",
+    instructions: "",
+    category: "",
+    image: null,
+    imagePreview: "",
   });
+
+  useEffect(() => {
+    const fetchRecipe = async () => {
+      try {
+        const response = await axios.get(`https://mern-recipe-app1-server.onrender.com/recipe/${id}`);
+        const recipe = response.data;
+        setRecipeData({
+          title: recipe.title,
+          ingredients: recipe.ingredients.join(", "),
+          instructions: recipe.instructions,
+          category: recipe.category,
+          image: null,
+          imagePreview: recipe.image,
+        });
+      } catch (error) {
+        console.error("Error fetching recipe:", error);
+      }
+    };
+
+    fetchRecipe();
+  }, [id]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -27,11 +51,31 @@ const EditRecipe = () => {
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Recipe Updated:", recipeData);
-    alert("Recipe updated successfully!");
-    navigate("/saved-recipes");
+
+    const formData = new FormData();
+    formData.append("title", recipeData.title);
+    formData.append("ingredients", recipeData.ingredients.split(","));
+    formData.append("instructions", recipeData.instructions);
+    formData.append("category", recipeData.category);
+    if (recipeData.image) {
+      formData.append("image", recipeData.image);
+    }
+
+    try {
+      await axios.post(`https://mern-recipe-app1-server.onrender.com/recipe/update`, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+          Authorization: `Bearer ${cookies.access_token}`,
+        },
+      });
+      alert("Recipe updated successfully!");
+      navigate("/my-recipes");
+    } catch (error) {
+      console.error("Error updating recipe:", error);
+      alert("Failed to update recipe. Please try again.");
+    }
   };
 
   return (

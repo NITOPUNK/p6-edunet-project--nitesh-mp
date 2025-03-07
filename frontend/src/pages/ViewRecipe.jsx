@@ -1,20 +1,22 @@
 import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
+import axios from "axios";
 
 const ViewRecipe = () => {
   const { id } = useParams();
   const [recipe, setRecipe] = useState(null);
 
   useEffect(() => {
-    // Mock data (Replace this with API call)
-    const mockRecipe = {
-      id,
-      title: "Sample Recipe",
-      image: "https://source.unsplash.com/400x300/?food",
-      category: "Dinner",
-      instructions: "Here are the steps to make this delicious recipe...",
+    const fetchRecipe = async () => {
+      try {
+        const response = await axios.get(`https://mern-recipe-app1-server.onrender.com/recipe/${id}`);
+        setRecipe(response.data);
+      } catch (error) {
+        console.error("Error fetching recipe:", error);
+      }
     };
-    setRecipe(mockRecipe);
+
+    fetchRecipe();
   }, [id]);
 
   if (!recipe) return <p>Loading...</p>;
@@ -26,6 +28,7 @@ const ViewRecipe = () => {
       <p><strong>Category:</strong> {recipe.category}</p>
       <h4>Instructions:</h4>
       <p>{recipe.instructions}</p>
+      <p><strong>Created by:</strong> {recipe.username}</p>
     </div>
   );
 };

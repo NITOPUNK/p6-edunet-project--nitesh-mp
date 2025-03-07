@@ -1,26 +1,31 @@
-import React from "react";
-import image1 from "../components/i.jpeg"; // Adjust path accordingly
+import React, { useState, useEffect } from "react";
+import axios from "axios";
 
 const Carosoul = () => {
- 
+  const [topRecipes, setTopRecipes] = useState([]);
 
+  useEffect(() => {
+    const fetchTopRecipes = async () => {
+      try {
+        const response = await axios.get("https://mern-recipe-app1-server.onrender.com/recipe/top");
+        setTopRecipes(response.data);
+      } catch (error) {
+        console.error("Error fetching top recipes:", error);
+      }
+    };
 
-const topRecipes = [
-  { id: 1, title: "Pasta", image: image1 },
-  { id: 2, title: "Paneer Curry", image: image1 },
-  { id: 3, title: "Choco Lava Cake", image: image1 }
-];
-
+    fetchTopRecipes();
+  }, []);
 
   return (
     <div id="recipeCarousel" className="carousel slide mt-4" data-bs-ride="carousel">
       <div className="carousel-inner">
         {topRecipes.map((recipe, index) => (
-          <div key={recipe.id} className={`carousel-item ${index === 0 ? "active" : ""}`}>
+          <div key={recipe._id} className={`carousel-item ${index === 0 ? "active" : ""}`}>
             <img src={recipe.image} className="d-block w-100" alt={recipe.title} style={{ height: "400px", objectFit: "cover" }} />
-
             <div className="carousel-caption d-none d-md-block">
               <h5>{recipe.title}</h5>
+              <p>{recipe.category}</p>
             </div>
           </div>
         ))}

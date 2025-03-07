@@ -1,29 +1,66 @@
 import React, { useState, useEffect } from "react";
+import axios from "axios";
 import { Link } from "react-router-dom";
+import { useCookies } from "react-cookie";
 
-const SavedRecipes = () => {
+const MyRecipes = () => {
   const [savedRecipes, setSavedRecipes] = useState([]);
   const [myRecipes, setMyRecipes] = useState([]);
+  const [cookies] = useCookies(["access_token"]);
 
   useEffect(() => {
-    const mockSavedRecipes = [
-      { id: 1, title: "Spaghetti Carbonara", image: "https://source.unsplash.com/400x300/?pasta", category: "Dinner" },
-      { id: 2, title: "Chocolate Cake", image: "https://source.unsplash.com/400x300/?cake", category: "Dessert" },
-    ];
-    setSavedRecipes(mockSavedRecipes);
+    const fetchSavedRecipes = async () => {
+      try {
+        const userId = window.localStorage.getItem("userID");
+        const response = await axios.get(`https://mern-recipe-app1-server.onrender.com/recipe/savedRecipes/${userId}`, {
+          headers: {
+            Authorization: `Bearer ${cookies.access_token}`,
+          },
+        });
+        setSavedRecipes(response.data.savedRecipes);
+      } catch (error) {
+        console.error("Error fetching saved recipes:", error);
+      }
+    };
 
-    const mockMyRecipes = [
-      { id: 3, title: "Avocado Toast", image: "https://source.unsplash.com/400x300/?avocado", category: "Breakfast" },
-      { id: 4, title: "Mango Smoothie", image: "https://source.unsplash.com/400x300/?mango", category: "Beverage" },
-    ];
-    setMyRecipes(mockMyRecipes);
-  }, []);
+    const fetchMyRecipes = async () => {
+      try {
+        const userId = window.localStorage.getItem("userID");
+        const response = await axios.get(`https://mern-recipe-app1-server.onrender.com/recipe/userRecipes/${userId}`, {
+          headers: {
+            Authorization: `Bearer ${cookies.access_token}`,
+          },
+        });
+        setMyRecipes(response.data.myRecipes);
+      } catch (error) {
+        console.error("Error fetching my recipes:", error);
+      }
+    };
 
-  const removeRecipe = (id, type) => {
-    if (type === "saved") {
-      setSavedRecipes(savedRecipes.filter(recipe => recipe.id !== id));
-    } else if (type === "my") {
-      setMyRecipes(myRecipes.filter(recipe => recipe.id !== id));
+    fetchSavedRecipes();
+    fetchMyRecipes();
+  }, [cookies.access_token]);
+
+  const removeRecipe = async (id, type) => {
+    try {
+      if (type === "saved") {
+        await axios.put(`https://mern-recipe-app1-server.onrender.com/recipe/removeSavedRecipe`, { recipeID: id }, {
+          headers: {
+            Authorization: `Bearer ${cookies.access_token}`,
+          },
+        });
+        setSavedRecipes(savedRecipes.filter(recipe => recipe._id !== id));
+      } else if (type === "my") {
+        await axios.delete(`https://mern-recipe-app1-server.onrender.com/recipe/delete`, {
+          headers: {
+            Authorization: `Bearer ${cookies.access_token}`,
+          },
+          data: { recipeID: id },
+        });
+        setMyRecipes(myRecipes.filter(recipe => recipe._id !== id));
+      }
+    } catch (error) {
+      console.error("Error removing recipe:", error);
     }
   };
 
@@ -32,14 +69,14 @@ const SavedRecipes = () => {
       <h2 className="mb-4">Saved Recipes</h2>
       <div className="row">
         {savedRecipes.length === 0 ? <p>No saved recipes yet.</p> : savedRecipes.map((recipe) => (
-          <div key={recipe.id} className="col-md-4 mb-4">
+          <div key={recipe._id} className="col-md-4 mb-4">
             <div className="card shadow">
               <img src={recipe.image} className="card-img-top" alt={recipe.title} />
               <div className="card-body">
                 <h5 className="card-title">{recipe.title}</h5>
                 <p className="card-text"><strong>Category:</strong> {recipe.category}</p>
-                <Link to={`/view-recipe/${recipe.id}`} className="btn btn-info me-2">View</Link>
-                <button className="btn btn-danger" onClick={() => removeRecipe(recipe.id, "saved")}>Remove</button>
+                <Link to={`/view-recipe/${recipe._id}`} className="btn btn-info me-2">View</Link>
+                <button className="btn btn-danger" onClick={() => removeRecipe(recipe._id, "saved")}>Remove</button>
               </div>
             </div>
           </div>
@@ -49,15 +86,15 @@ const SavedRecipes = () => {
       <h2 className="mb-4 mt-5">My Recipes (Editable)</h2>
       <div className="row">
         {myRecipes.length === 0 ? <p>You haven't added any recipes yet.</p> : myRecipes.map((recipe) => (
-          <div key={recipe.id} className="col-md-4 mb-4">
+          <div key={recipe._id} className="col-md-4 mb-4">
             <div className="card shadow">
               <img src={recipe.image} className="card-img-top" alt={recipe.title} />
               <div className="card-body">
                 <h5 className="card-title">{recipe.title}</h5>
                 <p className="card-text"><strong>Category:</strong> {recipe.category}</p>
-                <Link to={`/view-recipe/${recipe.id}`} className="btn btn-info me-2">View</Link>
-                <Link to={`/edit-recipe/${recipe.id}`} className="btn btn-primary me-2">Edit</Link>
-                <button className="btn btn-danger" onClick={() => removeRecipe(recipe.id, "my")}>Delete</button>
+                <Link to={`/view-recipe/${recipe._id}`} className="btn btn-info me-2">View</Link>
+                <Link to={`/edit-recipe/${recipe._id}`} className="btn btn-primary me-2">Edit</Link>
+                <button className="btn btn-danger" onClick={() => removeRecipe(recipe._id, "my")}>Delete</button>
               </div>
             </div>
           </div>
@@ -67,4 +104,4 @@ const SavedRecipes = () => {
   );
 };
 
-export default SavedRecipes;
+export default MyRecipes;

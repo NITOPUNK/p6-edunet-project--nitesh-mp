@@ -1,12 +1,29 @@
 import React, { useState } from "react";
+import axios from "axios";
+import { useCookies } from "react-cookie";
+import { useNavigate } from "react-router-dom";
 
 const Login = () => {
+  const [_, setCookies] = useCookies(["access_token"]);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Logging in with:", { email, password });
+
+    try {
+      const result = await axios.post("https://mern-recipe-app1-server.onrender.com/auth/login", {
+        email,
+        password,
+      });
+
+      setCookies("access_token", result.data.token);
+      window.localStorage.setItem("userID", result.data.userID);
+      navigate("/");
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   return (

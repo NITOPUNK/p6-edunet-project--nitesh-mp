@@ -1,22 +1,32 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { useCookies } from "react-cookie";
 
-const Navbar = ({ recipes }) => {
+const Navbar = () => {
   const [searchQuery, setSearchQuery] = useState("");
+  const [cookies, setCookies, removeCookies] = useCookies(["access_token"]);
+  const [username, setUsername] = useState("");
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const storedUsername = window.localStorage.getItem("username");
+    if (storedUsername) {
+      setUsername(storedUsername);
+    }
+  }, []);
 
   const handleSearch = (e) => {
     e.preventDefault();
-    const foundRecipe = recipes.find(
-      (recipe) => recipe.title.toLowerCase() === searchQuery.toLowerCase()
-    );
-
-    if (foundRecipe) {
-      navigate(`/recipe/${foundRecipe.id}`);
-    } else {
-      alert("Recipe not found!");
-    }
+    navigate(`/search?query=${searchQuery}`);
     setSearchQuery(""); // Clear input after search
+  };
+
+  const handleLogout = () => {
+    removeCookies("access_token");
+    window.localStorage.removeItem("username");
+    window.localStorage.removeItem("userID");
+    setUsername("");
+    navigate("/login");
   };
 
   return (
@@ -40,12 +50,16 @@ const Navbar = ({ recipes }) => {
             <li className="nav-item">
               <Link className="nav-link" to="/">Discover</Link>
             </li>
-            <li className="nav-item">
-              <Link className="nav-link" to="/create-recipe">My Recipe</Link>
-            </li>
-            <li className="nav-item">
-              <Link className="nav-link" to="/my-recipes">Saved Recipes</Link>
-            </li>
+            {username && (
+              <>
+                <li className="nav-item">
+                  <Link className="nav-link" to="/create-recipe">Create Recipe</Link>
+                </li>
+                <li className="nav-item">
+                  <Link className="nav-link" to="/my-recipes">My Recipes</Link>
+                </li>
+              </>
+            )}
           </ul>
 
           {/* Search Bar */}
@@ -63,12 +77,25 @@ const Navbar = ({ recipes }) => {
           </form>
 
           <ul className="navbar-nav ms-3">
-            <li className="nav-item">
-              <Link className="nav-link btn btn-outline-light me-2" to="/login">Login</Link>
-            </li>
-            <li className="nav-item">
-              <Link className="nav-link btn btn-primary" to="/register">Register</Link>
-            </li>
+            {username ? (
+              <>
+                <li className="nav-item">
+                  <span className="nav-link text-light">Hello, {username}</span>
+                </li>
+                <li className="nav-item">
+                  <button className="nav-link btn btn-outline-light me-2" onClick={handleLogout}>Logout</button>
+                </li>
+              </>
+            ) : (
+              <>
+                <li className="nav-item">
+                  <Link className="nav-link btn btn-outline-light me-2" to="/login">Login</Link>
+                </li>
+                <li className="nav-item">
+                  <Link className="nav-link btn btn-primary" to="/register">Register</Link>
+                </li>
+              </>
+            )}
           </ul>
         </div>
       </div>

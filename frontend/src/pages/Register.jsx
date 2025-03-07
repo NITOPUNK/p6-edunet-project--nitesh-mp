@@ -1,13 +1,28 @@
 import React, { useState } from "react";
+import axios from "axios";
+import { useCookies } from "react-cookie";
+import { useNavigate } from "react-router-dom";
 
 const Register = () => {
-  const [name, setName] = useState("");
+  const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [_, setCookies] = useCookies(["access_token"]);
+  const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    console.log("Registering with:", { name, email, password });
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    try {
+      await axios.post("https://mern-recipe-app1-server.onrender.com/auth/register", {
+        username,
+        email,
+        password,
+      });
+      alert("Registration Completed! Now login.");
+      navigate("/login");
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   return (
@@ -18,12 +33,12 @@ const Register = () => {
             <h2 className="text-center">Register</h2>
             <form onSubmit={handleSubmit}>
               <div className="mb-3">
-                <label className="form-label">Full Name</label>
+                <label className="form-label">Username</label>
                 <input
                   type="text"
                   className="form-control"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
                   required
                 />
               </div>

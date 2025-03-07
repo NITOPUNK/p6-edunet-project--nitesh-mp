@@ -8,7 +8,6 @@ const Footer = () => {
       <p className="mb-0">
         <Link to="/about" className="text-light mx-2">About Us</Link> | 
         <Link to="/contact" className="text-light mx-2">Contact us</Link> | 
-        <Link to="/privacy" className="text-light mx-2">Privacy Policy</Link>
       </p>
     </footer>
   );
