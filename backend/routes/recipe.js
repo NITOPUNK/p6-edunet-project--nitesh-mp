@@ -1,7 +1,7 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const { RecipesModel } = require('../models/recipe.js');
-const { UserModel } = require('../models/Users.js');
+const { UserModel } = require('../models/user.js');
 const { verifyToken } = require('./user.js');
 
 const router = express.Router();
