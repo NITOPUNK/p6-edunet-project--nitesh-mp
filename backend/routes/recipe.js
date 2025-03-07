@@ -2,7 +2,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const { RecipesModel } = require('../models/recipe.js');
 const { UserModel } = require('../models/user.js');
-const { verifyToken } = require('./user.js');
+const { verifyToken } = require('./auth.js'); // Import verifyToken from the exported object
 
 const router = express.Router();
 

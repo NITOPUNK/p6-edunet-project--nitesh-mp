@@ -64,4 +64,4 @@ const verifyToken = (req, res, next) => {
     }
 };
 
-module.exports = router;
+module.exports = { router, verifyToken };
