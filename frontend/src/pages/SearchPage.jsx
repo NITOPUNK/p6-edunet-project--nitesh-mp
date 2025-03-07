@@ -10,7 +10,7 @@ const SearchPage = () => {
   useEffect(() => {
     const fetchRecipes = async () => {
       try {
-        const response = await axios.get(`https://mern-recipe-app1-server.onrender.com/recipe/search?query=${query}`);
+        const response = await axios.get(`https://p6-edunet-project-nitesh-mp.onrender.com/recipe/search?query=${query}`);
         setFilteredRecipes(response.data);
       } catch (error) {
         console.error("Error fetching recipes:", error);

@@ -36,7 +36,7 @@ const CreateRecipe = () => {
     formData.append("createdByName", window.localStorage.getItem("username"));
 
     try {
-      await axios.post("https://mern-recipe-app1-server.onrender.com/recipe/add", formData, {
+      await axios.post("https://p6-edunet-project-nitesh-mp.onrender.com/recipe/add", formData, {
         headers: {
           "Content-Type": "multipart/form-data",
           Authorization: `Bearer ${cookies.access_token}`,

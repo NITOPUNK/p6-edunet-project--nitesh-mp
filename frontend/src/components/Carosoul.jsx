@@ -7,7 +7,7 @@ const Carosoul = () => {
   useEffect(() => {
     const fetchTopRecipes = async () => {
       try {
-        const response = await axios.get("https://mern-recipe-app1-server.onrender.com/recipe/top");
+        const response = await axios.get("https://p6-edunet-project-nitesh-mp.onrender.com/recipe/top");
         setTopRecipes(response.data);
       } catch (error) {
         console.error("Error fetching top recipes:", error);

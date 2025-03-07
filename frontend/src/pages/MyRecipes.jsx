@@ -12,7 +12,7 @@ const MyRecipes = () => {
     const fetchSavedRecipes = async () => {
       try {
         const userId = window.localStorage.getItem("userID");
-        const response = await axios.get(`https://mern-recipe-app1-server.onrender.com/recipe/savedRecipes/${userId}`, {
+        const response = await axios.get(`https://p6-edunet-project-nitesh-mp.onrender.com/recipe/savedRecipes/${userId}`, {
           headers: {
             Authorization: `Bearer ${cookies.access_token}`,
           },
@@ -26,7 +26,7 @@ const MyRecipes = () => {
     const fetchMyRecipes = async () => {
       try {
         const userId = window.localStorage.getItem("userID");
-        const response = await axios.get(`https://mern-recipe-app1-server.onrender.com/recipe/userRecipes/${userId}`, {
+        const response = await axios.get(`https://p6-edunet-project-nitesh-mp.onrender.com/recipe/userRecipes/${userId}`, {
           headers: {
             Authorization: `Bearer ${cookies.access_token}`,
           },
@@ -44,14 +44,14 @@ const MyRecipes = () => {
   const removeRecipe = async (id, type) => {
     try {
       if (type === "saved") {
-        await axios.put(`https://mern-recipe-app1-server.onrender.com/recipe/removeSavedRecipe`, { recipeID: id }, {
+        await axios.put(`https://p6-edunet-project-nitesh-mp.onrender.com/recipe/removeSavedRecipe`, { recipeID: id }, {
           headers: {
             Authorization: `Bearer ${cookies.access_token}`,
           },
         });
         setSavedRecipes(savedRecipes.filter(recipe => recipe._id !== id));
       } else if (type === "my") {
-        await axios.delete(`https://mern-recipe-app1-server.onrender.com/recipe/delete`, {
+        await axios.delete(`https://p6-edunet-project-nitesh-mp.onrender.com/recipe/delete`, {
           headers: {
             Authorization: `Bearer ${cookies.access_token}`,
           },

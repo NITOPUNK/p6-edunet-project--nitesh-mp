@@ -20,7 +20,7 @@ const EditRecipe = () => {
   useEffect(() => {
     const fetchRecipe = async () => {
       try {
-        const response = await axios.get(`https://mern-recipe-app1-server.onrender.com/recipe/${id}`);
+        const response = await axios.get(`https://p6-edunet-project-nitesh-mp.onrender.com/recipe/${id}`);
         const recipe = response.data;
         setRecipeData({
           title: recipe.title,
@@ -64,7 +64,7 @@ const EditRecipe = () => {
     }
 
     try {
-      await axios.post(`https://mern-recipe-app1-server.onrender.com/recipe/update`, formData, {
+      await axios.post(`https://p6-edunet-project-nitesh-mp.onrender.com/recipe/update`, formData, {
         headers: {
           "Content-Type": "multipart/form-data",
           Authorization: `Bearer ${cookies.access_token}`,

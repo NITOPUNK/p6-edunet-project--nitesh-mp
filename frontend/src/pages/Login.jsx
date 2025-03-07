@@ -13,7 +13,7 @@ const Login = () => {
     e.preventDefault();
 
     try {
-      const result = await axios.post("https://mern-recipe-app1-server.onrender.com/auth/login", {
+      const result = await axios.post("https://p6-edunet-project-nitesh-mp.onrender.com/auth/login", {
         email,
         password,
       });

@@ -9,7 +9,7 @@ const Discover = () => {
   useEffect(() => {
     const fetchRecipes = async () => {
       try {
-        const response = await axios.get("https://mern-recipe-app1-server.onrender.com/recipe/discover");
+        const response = await axios.get("https://p6-edunet-project-nitesh-mp.onrender.com/recipe/discover");
         setRecipes(response.data);
       } catch (error) {
         console.error("Error fetching recipes:", error);
