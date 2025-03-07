@@ -9,20 +9,27 @@ const Navbar = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
+    // Check both cookie and username on component mount and when cookies change
     const storedUsername = window.localStorage.getItem("username");
-    if (storedUsername) {
+    if (cookies.access_token && storedUsername) {
       setUsername(storedUsername);
+    } else {
+      setUsername("");
     }
-  }, []);
+  }, [cookies.access_token]);
 
   const handleSearch = (e) => {
     e.preventDefault();
     navigate(`/search?query=${searchQuery}`);
-    setSearchQuery(""); // Clear input after search
+    setSearchQuery("");
   };
 
   const handleLogout = () => {
-    removeCookies("access_token");
+    removeCookies("access_token", { 
+      path: "/",
+      secure: true,
+      sameSite: "none"
+    });
     window.localStorage.removeItem("username");
     window.localStorage.removeItem("userID");
     setUsername("");

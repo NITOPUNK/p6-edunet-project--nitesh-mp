@@ -4,9 +4,10 @@ import { useCookies } from "react-cookie";
 import { useNavigate } from "react-router-dom";
 
 const Login = () => {
-  const [_, setCookies] = useCookies(["access_token"]);
+  const [cookies, setCookies] = useCookies(["access_token"]);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
@@ -18,11 +19,22 @@ const Login = () => {
         password,
       });
 
-      setCookies("access_token", result.data.token);
+      setCookies("access_token", result.data.token, {
+        path: "/",
+        secure: true,
+        sameSite: "none",
+        maxAge: 3600 // 1 hour in seconds
+      });
+      
       window.localStorage.setItem("userID", result.data.userID);
-      navigate("/");
+      window.localStorage.setItem("username", result.data.username);
+      setSuccessMessage("Login successful! Redirecting...");
+      setTimeout(() => {
+        navigate("/");
+      }, 2000);
     } catch (error) {
       console.error(error);
+      setSuccessMessage("Login failed. Please check your credentials.");
     }
   };
 
@@ -32,6 +44,11 @@ const Login = () => {
         <div className="col-md-4">
           <div className="card p-4 shadow">
             <h2 className="text-center">Login</h2>
+            {successMessage && (
+              <div className="alert alert-success text-center" role="alert">
+                {successMessage}
+              </div>
+            )}
             <form onSubmit={handleSubmit}>
               <div className="mb-3">
                 <label className="form-label">Email</label>
