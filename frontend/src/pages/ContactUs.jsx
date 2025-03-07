@@ -14,7 +14,7 @@ const ContactUs = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
     const { name, email, message } = formData;
-    // mail to sent to the recipeshr@gmail (dummy account , not real email )
+    // mail to sent to the recipeshr@gmail (dummy account, not real email)
     const mailtoLink = `mailto:recipeshr@gmail.com?subject=Feedback from ${name}&body=${encodeURIComponent(message)}%0D%0A%0D%0AFrom: ${name} (${email})`;
     window.location.href = mailtoLink;
   };
