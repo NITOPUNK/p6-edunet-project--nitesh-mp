@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import axios from "axios";
+import { useCookies } from "react-cookie";
 
 const ViewRecipe = () => {
   const { id } = useParams();
   const [recipe, setRecipe] = useState(null);
+  const [cookies] = useCookies(["access_token"]);
 
   useEffect(() => {
     const fetchRecipe = async () => {
@@ -18,6 +20,24 @@ const ViewRecipe = () => {
 
     fetchRecipe();
   }, [id]);
+
+  const handleSaveRecipe = async () => {
+    const userId = window.localStorage.getItem("userID");
+    try {
+      await axios.put("https://p6-edunet-project-nitesh-mp.onrender.com/recipe/save", {
+        userId,
+        recipeId: id,
+      }, {
+        headers: {
+          Authorization: `Bearer ${cookies.access_token}`,
+        },
+      });
+      alert("Recipe saved successfully!");
+    } catch (error) {
+      console.error("Error saving recipe:", error);
+      alert("Failed to save recipe. Please try again.");
+    }
+  };
 
   if (!recipe) return <p>Loading...</p>;
 
@@ -36,6 +56,7 @@ const ViewRecipe = () => {
       <h4>Instructions:</h4>
       <p>{recipe.instructions}</p>
       <p><strong>Created by:</strong> {recipe.createdByName}</p>
+      <button className="btn btn-primary mt-3" onClick={handleSaveRecipe}>Save Recipe</button>
     </div>
   );
 };

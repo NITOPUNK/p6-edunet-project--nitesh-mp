@@ -10,7 +10,6 @@ const router = express.Router();
 
 
 
-
 // to add a new recipe
 router.post("/add", verifyToken, async (req, res) => {
     const { title, description, ingredients, instructions, category, image, createdBy, createdByName } = req.body;
@@ -33,6 +32,19 @@ router.post("/add", verifyToken, async (req, res) => {
 });
 
 
+
+
+// to save a recipe
+router.put("/save", verifyToken, async (req, res) => {
+    const { userId, recipeId } = req.body;
+    try {
+        await User.findByIdAndUpdate(userId, { $push: { savedRecipes: recipeId } });
+        res.json({ message: "Recipe saved successfully" });
+    } catch (err) {
+        console.log(err);
+        res.status(500).json({ message: "Failed to save recipe" });
+    }
+});
 
 
 
