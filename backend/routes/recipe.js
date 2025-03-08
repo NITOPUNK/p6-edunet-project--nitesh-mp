@@ -31,9 +31,6 @@ router.post("/add", verifyToken, async (req, res) => {
     }
 });
 
-
-
-
 // to save a recipe
 router.put("/save", verifyToken, async (req, res) => {
     const { userId, recipeId } = req.body;
@@ -45,8 +42,6 @@ router.put("/save", verifyToken, async (req, res) => {
         res.status(500).json({ message: "Failed to save recipe" });
     }
 });
-
-
 
 
 
