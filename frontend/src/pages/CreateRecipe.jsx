@@ -23,15 +23,30 @@ const CreateRecipe = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    if (!cookies.access_token) {
+      alert("Please login to create a recipe");
+      navigate("/login");
+      return;
+    }
+
+    const userID = window.localStorage.getItem("userID");
+    const username = window.localStorage.getItem("username");
+
+    if (!userID || !username) {
+      alert("User information not found. Please login again.");
+      navigate("/login");
+      return;
+    }
+
     const recipe = {
       title: recipeData.title,
-      description: recipeData.description, // Include description
-      ingredients: recipeData.ingredients.split(","),
+      description: recipeData.description,
+      ingredients: recipeData.ingredients.split(",").map(item => item.trim()),
       instructions: recipeData.instructions,
       category: recipeData.category,
       image: recipeData.image,
-      createdBy: window.localStorage.getItem("userID"),
-      createdByName: window.localStorage.getItem("username"),
+      createdBy: userID,
+      createdByName: username,
     };
 
     try {
@@ -44,7 +59,11 @@ const CreateRecipe = () => {
       navigate("/");
     } catch (error) {
       console.error("Error submitting recipe:", error);
-      alert("Failed to submit recipe. Please try again.");
+      if (error.response) {
+        alert(`Failed to submit recipe: ${error.response.data.message || 'Please try again.'}`);
+      } else {
+        alert("Failed to submit recipe. Please try again.");
+      }
     }
   };
 

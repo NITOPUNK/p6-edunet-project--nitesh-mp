@@ -24,9 +24,9 @@ const ViewRecipe = () => {
   const handleSaveRecipe = async () => {
     const userId = window.localStorage.getItem("userID");
     try {
-      await axios.put("https://p6-edunet-project-nitesh-mp.onrender.com/recipe/save", {
-        userId,
-        recipeId: id,
+      await axios.put("https://p6-edunet-project-nitesh-mp.onrender.com/recipe", {
+        userID: userId,
+        recipeID: id
       }, {
         headers: {
           Authorization: `Bearer ${cookies.access_token}`,
