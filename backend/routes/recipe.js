@@ -46,15 +46,42 @@ router.post("/add", verifyToken, async (req, res) => {
     }
 });
 
-// to save a recipe
+// Save a Recipe
 router.put("/save", verifyToken, async (req, res) => {
-    const { userId, recipeId } = req.body;
+    const { userID, recipeID } = req.body;
+    
     try {
-        await User.findByIdAndUpdate(userId, { $push: { savedRecipes: recipeId } });
-        res.json({ message: "Recipe saved successfully" });
+        // Check if recipe exists
+        const recipe = await RecipesModel.findById(recipeID);
+        if (!recipe) {
+            return res.status(404).json({ message: "Recipe not found" });
+        }
+
+        // Check if user exists
+        const user = await UserModel.findById(userID);
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        // Check if recipe is already saved
+        if (user.savedRecipes.includes(recipeID)) {
+            return res.status(400).json({ message: "Recipe already saved" });
+        }
+
+        // Add recipe to user's saved recipes
+        user.savedRecipes.push(recipeID);
+        await user.save();
+        
+        res.status(200).json({ 
+            message: "Recipe saved successfully",
+            savedRecipes: user.savedRecipes 
+        });
     } catch (err) {
-        console.log(err);
-        res.status(500).json({ message: "Failed to save recipe" });
+        console.error("Error saving recipe:", err);
+        res.status(500).json({ 
+            message: "Failed to save recipe",
+            error: err.message 
+        });
     }
 });
 
@@ -134,45 +161,6 @@ router.get("/:recipeId", async (req, res) => {
         res.status(200).json(result);
     } catch (err) {
         res.status(500).json(err);
-    }
-});
-
-// Save a Recipe
-router.put("/", verifyToken, async (req, res) => {
-    const { userID, recipeID } = req.body;
-    
-    try {
-        // Check if recipe exists
-        const recipe = await RecipesModel.findById(recipeID);
-        if (!recipe) {
-            return res.status(404).json({ message: "Recipe not found" });
-        }
-
-        // Check if user exists
-        const user = await UserModel.findById(userID);
-        if (!user) {
-            return res.status(404).json({ message: "User not found" });
-        }
-
-        // Check if recipe is already saved
-        if (user.savedRecipes.includes(recipeID)) {
-            return res.status(400).json({ message: "Recipe already saved" });
-        }
-
-        // Add recipe to user's saved recipes
-        user.savedRecipes.push(recipeID);
-        await user.save();
-        
-        res.status(200).json({ 
-            message: "Recipe saved successfully",
-            savedRecipes: user.savedRecipes 
-        });
-    } catch (err) {
-        console.error("Error saving recipe:", err);
-        res.status(500).json({ 
-            message: "Failed to save recipe",
-            error: err.message 
-        });
     }
 });
 

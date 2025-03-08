@@ -37,7 +37,7 @@ const ViewRecipe = () => {
     }
 
     try {
-      const response = await axios.put("https://p6-edunet-project-nitesh-mp.onrender.com/recipe", {
+      const response = await axios.put("https://p6-edunet-project-nitesh-mp.onrender.com/recipe/save", {
         userID,
         recipeID: id
       }, {
@@ -45,10 +45,15 @@ const ViewRecipe = () => {
           Authorization: `Bearer ${cookies.access_token}`,
         },
       });
-      alert(response.data.message || "Recipe saved successfully!");
+      
+      if (response.data.message) {
+        alert(response.data.message);
+      } else {
+        alert("Recipe saved successfully!");
+      }
     } catch (error) {
       console.error("Error saving recipe:", error);
-      if (error.response) {
+      if (error.response && error.response.data) {
         alert(error.response.data.message || "Failed to save recipe. Please try again.");
       } else {
         alert("Failed to save recipe. Please check your connection and try again.");
