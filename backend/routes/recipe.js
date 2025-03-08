@@ -22,16 +22,16 @@ router.post("/add", verifyToken, async (req, res) => {
             instructions, 
             category, 
             image, 
-            createdBy: new mongoose.Types.ObjectId(createdBy), 
+            createdBy, 
             createdByName 
         });
         
         const savedRecipe = await newRecipe.save();
         
-        // Update the user's createdRecipes array
+        // Update the user's createdRecipes array with just the ID
         const updatedUser = await User.findByIdAndUpdate(
             createdBy,
-            { $push: { createdRecipes: savedRecipe._id } },
+            { $push: { createdRecipes: savedRecipe._id.toString() } },
             { new: true }
         );
 
@@ -64,12 +64,12 @@ router.put("/save", verifyToken, async (req, res) => {
             return res.status(404).json({ message: "Recipe not found" });
         }
 
-        // Check if user exists and update their savedRecipes
+        // Check if user exists and update their savedRecipes with just the ID
         const updatedUser = await User.findByIdAndUpdate(
             userID,
-            { $addToSet: { savedRecipes: new mongoose.Types.ObjectId(recipeID) } },
+            { $addToSet: { savedRecipes: recipeID } },
             { new: true }
-        ).populate('savedRecipes');
+        );
 
         if (!updatedUser) {
             return res.status(404).json({ message: "User not found" });
@@ -181,15 +181,19 @@ router.get("/savedRecipes/ids/:userId", async (req, res) => {
 // Get saved recipes for a user
 router.get("/savedRecipes/:userId", async (req, res) => {
     try {
-        const user = await User.findById(req.params.userId)
-            .populate('savedRecipes');
+        const user = await User.findById(req.params.userId);
         
         if (!user) {
             return res.status(404).json({ message: "User not found" });
         }
 
+        // Fetch all saved recipes using the IDs
+        const savedRecipes = await RecipesModel.find({
+            _id: { $in: user.savedRecipes }
+        });
+
         res.status(200).json({ 
-            savedRecipes: user.savedRecipes 
+            savedRecipes: savedRecipes 
         });
     } catch (err) {
         console.error("Error fetching saved recipes:", err);
@@ -203,15 +207,19 @@ router.get("/savedRecipes/:userId", async (req, res) => {
 // Get created recipes for a user
 router.get("/createdRecipes/:userId", async (req, res) => {
     try {
-        const user = await User.findById(req.params.userId)
-            .populate('createdRecipes');
+        const user = await User.findById(req.params.userId);
         
         if (!user) {
             return res.status(404).json({ message: "User not found" });
         }
 
+        // Fetch all created recipes using the IDs
+        const createdRecipes = await RecipesModel.find({
+            _id: { $in: user.createdRecipes }
+        });
+
         res.status(200).json({ 
-            createdRecipes: user.createdRecipes 
+            createdRecipes: createdRecipes 
         });
     } catch (err) {
         console.error("Error fetching created recipes:", err);

@@ -4,8 +4,8 @@ const UserSchema = new mongoose.Schema({
     username: { type: String, required: true, unique: true },
     email: { type: String, required: true, unique: true },
     password: { type: String, required: true },
-    savedRecipes: [{ type: mongoose.Schema.Types.ObjectId, ref: "Recipe" }],
-    createdRecipes: [{ type: mongoose.Schema.Types.ObjectId, ref: "Recipe" }]
+    savedRecipes: [mongoose.Schema.Types.ObjectId],
+    createdRecipes: [mongoose.Schema.Types.ObjectId]
 }, 
 { timestamps: true }
 );
