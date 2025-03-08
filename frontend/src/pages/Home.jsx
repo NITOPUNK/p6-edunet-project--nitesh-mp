@@ -36,7 +36,7 @@ const Discover = () => {
                     View Recipe
                   </Link>
                 </div>
-                <div className="card-footer text-muted">Created by {recipe.username}</div>
+                <div className="card-footer text-muted">Created by {recipe.createdByName}</div>
               </div>
             </div>
           ))}

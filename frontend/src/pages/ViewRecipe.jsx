@@ -26,9 +26,16 @@ const ViewRecipe = () => {
       <h2>{recipe.title}</h2>
       <img src={recipe.image} alt={recipe.title} className="img-fluid mb-3" />
       <p><strong>Category:</strong> {recipe.category}</p>
+      <p><strong>Description:</strong> {recipe.description}</p>
+      <h4>Ingredients:</h4>
+      <ul>
+        {recipe.ingredients.map((ingredient, index) => (
+          <li key={index}>{ingredient}</li>
+        ))}
+      </ul>
       <h4>Instructions:</h4>
       <p>{recipe.instructions}</p>
-      <p><strong>Created by:</strong> {recipe.username}</p>
+      <p><strong>Created by:</strong> {recipe.createdByName}</p>
     </div>
   );
 };
