@@ -1,35 +1,26 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { useParams, useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { useCookies } from "react-cookie";
 
 const EditRecipe = () => {
-  const { id } = useParams();
-  const navigate = useNavigate();
-  const [cookies] = useCookies(["access_token"]);
-
   const [recipeData, setRecipeData] = useState({
     title: "",
+    description: "", // Add description to the state
     ingredients: "",
     instructions: "",
     category: "",
-    image: null,
-    imagePreview: "",
+    image: "", // Add image to the state
   });
+  const [cookies] = useCookies(["access_token"]);
+  const navigate = useNavigate();
+  const { id } = useParams();
 
   useEffect(() => {
     const fetchRecipe = async () => {
       try {
         const response = await axios.get(`https://p6-edunet-project-nitesh-mp.onrender.com/recipe/${id}`);
-        const recipe = response.data;
-        setRecipeData({
-          title: recipe.title,
-          ingredients: recipe.ingredients.join(", "),
-          instructions: recipe.instructions,
-          category: recipe.category,
-          image: null,
-          imagePreview: recipe.image,
-        });
+        setRecipeData(response.data);
       } catch (error) {
         console.error("Error fetching recipe:", error);
       }
@@ -43,35 +34,28 @@ const EditRecipe = () => {
     setRecipeData({ ...recipeData, [name]: value });
   };
 
-  const handleImageChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      const imageUrl = URL.createObjectURL(file);
-      setRecipeData({ ...recipeData, image: file, imagePreview: imageUrl });
-    }
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const formData = new FormData();
-    formData.append("title", recipeData.title);
-    formData.append("ingredients", recipeData.ingredients.split(","));
-    formData.append("instructions", recipeData.instructions);
-    formData.append("category", recipeData.category);
-    if (recipeData.image) {
-      formData.append("image", recipeData.image);
-    }
+    const recipe = {
+      title: recipeData.title,
+      description: recipeData.description, // Include description
+      ingredients: recipeData.ingredients.split(","),
+      instructions: recipeData.instructions,
+      category: recipeData.category,
+      image: recipeData.image,
+      createdBy: window.localStorage.getItem("userID"),
+      createdByName: window.localStorage.getItem("username"),
+    };
 
     try {
-      await axios.post(`https://p6-edunet-project-nitesh-mp.onrender.com/recipe/update`, formData, {
+      await axios.put(`https://p6-edunet-project-nitesh-mp.onrender.com/recipe/${id}`, recipe, {
         headers: {
-          "Content-Type": "multipart/form-data",
           Authorization: `Bearer ${cookies.access_token}`,
         },
       });
       alert("Recipe updated successfully!");
-      navigate("/my-recipes");
+      navigate("/");
     } catch (error) {
       console.error("Error updating recipe:", error);
       alert("Failed to update recipe. Please try again.");
@@ -92,6 +76,20 @@ const EditRecipe = () => {
             value={recipeData.title}
             onChange={handleChange}
             required
+          />
+        </div>
+
+        {/* Description */}
+        <div className="mb-3">
+          <label className="form-label">Description</label>
+          <textarea
+            className="form-control"
+            name="description"
+            value={recipeData.description}
+            onChange={handleChange}
+            required
+            rows="3"
+            placeholder="Short description of the recipe"
           />
         </div>
 
@@ -141,28 +139,22 @@ const EditRecipe = () => {
           </select>
         </div>
 
-        {/* Image Upload */}
+        {/* Image URL */}
         <div className="mb-3">
-          <label className="form-label">Upload Image</label>
+          <label className="form-label">Paste Image URL</label>
           <input
-            type="file"
+            type="text"
             className="form-control"
-            accept="image/*"
-            onChange={handleImageChange}
+            name="image"
+            value={recipeData.image}
+            onChange={handleChange}
+            placeholder="Paste image URL"
           />
-          {recipeData.imagePreview && (
-            <img
-              src={recipeData.imagePreview}
-              alt="Recipe Preview"
-              className="mt-3 img-fluid rounded"
-              style={{ maxHeight: "200px" }}
-            />
-          )}
         </div>
 
         {/* Submit Button */}
-        <button type="submit" className="btn btn-success w-100">
-          Save Changes
+        <button type="submit" className="btn btn-primary w-100">
+          Update Recipe
         </button>
       </form>
     </div>

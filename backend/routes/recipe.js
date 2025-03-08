@@ -8,22 +8,26 @@ const router = express.Router();
 
 // routing all the recipe related requests
 
+
 // to add a new recipe
 router.post("/add", verifyToken, async (req, res) => {
-    const { title, description, ingredients, instructions, category, image, username } = req.body;
+    const { title, description, ingredients, instructions, category, image, createdBy, createdByName } = req.body;
     try {
-        const newRecipe = new RecipesModel({ title, description, ingredients, instructions, category, image, username });
+        const newRecipe = new RecipesModel({ title, description, ingredients, instructions, category, image, createdBy, createdByName });
         await newRecipe.save()
             .then(() => {
                 res.json({ message: "Recipe added successfully" });
             })
             .catch((err) => {
                 console.log(err);
+                res.status(500).json({ message: "Failed to add recipe" });
             });
     } catch (err) {
         console.log(err);
+        res.status(500).json({ message: "Failed to add recipe" });
     }
 });
+
 
 // update an existing recipe
 router.post("/update", verifyToken, async (req, res) => {

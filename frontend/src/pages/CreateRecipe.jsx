@@ -6,10 +6,11 @@ import { useCookies } from "react-cookie";
 const CreateRecipe = () => {
   const [recipeData, setRecipeData] = useState({
     title: "",
+    description: "", // Add description to the state
     ingredients: "",
     instructions: "",
     category: "",
-    image: null,
+    image: "", // Add image to the state
   });
   const [cookies] = useCookies(["access_token"]);
   const navigate = useNavigate();
@@ -19,26 +20,23 @@ const CreateRecipe = () => {
     setRecipeData({ ...recipeData, [name]: value });
   };
 
-  const handleImageChange = (e) => {
-    setRecipeData({ ...recipeData, image: e.target.files[0] });
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const formData = new FormData();
-    formData.append("title", recipeData.title);
-    formData.append("ingredients", recipeData.ingredients.split(","));
-    formData.append("instructions", recipeData.instructions);
-    formData.append("category", recipeData.category);
-    formData.append("image", recipeData.image);
-    formData.append("createdBy", window.localStorage.getItem("userID"));
-    formData.append("createdByName", window.localStorage.getItem("username"));
+    const recipe = {
+      title: recipeData.title,
+      description: recipeData.description, // Include description
+      ingredients: recipeData.ingredients.split(","),
+      instructions: recipeData.instructions,
+      category: recipeData.category,
+      image: recipeData.image,
+      createdBy: window.localStorage.getItem("userID"),
+      createdByName: window.localStorage.getItem("username"),
+    };
 
     try {
-      await axios.post("https://p6-edunet-project-nitesh-mp.onrender.com/recipe/add", formData, {
+      await axios.post("https://p6-edunet-project-nitesh-mp.onrender.com/recipe/add", recipe, {
         headers: {
-          "Content-Type": "multipart/form-data",
           Authorization: `Bearer ${cookies.access_token}`,
         },
       });
@@ -64,6 +62,20 @@ const CreateRecipe = () => {
             value={recipeData.title}
             onChange={handleChange}
             required
+          />
+        </div>
+
+        {/* Description */}
+        <div className="mb-3">
+          <label className="form-label">Description</label>
+          <textarea
+            className="form-control"
+            name="description"
+            value={recipeData.description}
+            onChange={handleChange}
+            required
+            rows="3"
+            placeholder="Short description of the recipe"
           />
         </div>
 
@@ -113,15 +125,16 @@ const CreateRecipe = () => {
           </select>
         </div>
 
-        {/* Image Upload */}
+        {/* Image URL */}
         <div className="mb-3">
-          <label className="form-label">Upload Image</label>
+          <label className="form-label">Paste Image URL</label>
           <input
-            type="file"
+            type="text"
             className="form-control"
-            accept="image/*"
-            onChange={handleImageChange}
-            required
+            name="image"
+            value={recipeData.image}
+            onChange={handleChange}
+            placeholder="Paste image URL"
           />
         </div>
 
