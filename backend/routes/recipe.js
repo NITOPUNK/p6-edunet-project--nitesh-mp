@@ -183,55 +183,25 @@ router.get("/search", async (req, res) => {
             return res.status(200).json({ message: "No recipes found matching your search" });
         }
 
-        // Increment searchCount for all found recipes
+        // Increment searchCount for all found recipes (only once per search)
         const recipeIds = searchResult.map(recipe => recipe._id);
         await RecipesModel.updateMany(
             { _id: { $in: recipeIds } },
             { $inc: { searchCount: 1 } }
         );
 
-        res.status(200).json(searchResult);
+        // Get the updated recipes with new search counts
+        const updatedSearchResult = await RecipesModel.find({
+            _id: { $in: recipeIds }
+        }).select("title description image category createdByName _id views searchCount");
+
+        res.status(200).json(updatedSearchResult);
     } catch (err) {
         console.error("Search error:", err);
         res.status(500).json({ 
             message: "An error occurred while searching for recipes",
             error: err.message 
         });
-    }
-});
-
-// Get a recipe by ID
-router.get("/:recipeId", async (req, res) => {
-    try {
-        // Find and update the recipe to increment views
-        const result = await RecipesModel.findByIdAndUpdate(
-            req.params.recipeId,
-            { $inc: { views: 1 } }, // Increment views by 1
-            { new: true } // Return the updated document
-        );
-        
-        if (!result) {
-            return res.status(404).json({ message: "Recipe not found" });
-        }
-        
-        res.status(200).json(result);
-    } catch (err) {
-        console.error("Error fetching recipe:", err);
-        res.status(500).json({ 
-            message: "Failed to fetch recipe",
-            error: err.message 
-        });
-    }
-});
-
-// Get id of saved recipes
-router.get("/savedRecipes/ids/:userId", async (req, res) => {
-    try {
-        const user = await User.findById(req.params.userId);
-        res.status(201).json({ savedRecipes: user?.savedRecipes });
-    } catch (err) {
-        console.log(err);
-        res.status(500).json(err);
     }
 });
 
@@ -282,6 +252,45 @@ router.get("/createdRecipes/:userId", async (req, res) => {
         console.error("Error fetching created recipes:", err);
         res.status(500).json({ 
             message: "Failed to fetch created recipes",
+            error: err.message 
+        });
+    }
+});
+
+// Get id of saved recipes
+router.get("/savedRecipes/ids/:userId", async (req, res) => {
+    try {
+        const user = await User.findById(req.params.userId);
+        res.status(201).json({ savedRecipes: user?.savedRecipes });
+    } catch (err) {
+        console.log(err);
+        res.status(500).json(err);
+    }
+});
+
+// Get a recipe by ID (must be last GET route to avoid conflicts)
+router.get("/:recipeId", async (req, res) => {
+    try {
+        // Find the recipe first without incrementing
+        const recipe = await RecipesModel.findById(req.params.recipeId);
+        
+        if (!recipe) {
+            return res.status(404).json({ message: "Recipe not found" });
+        }
+
+        // Increment views in a separate operation
+        await RecipesModel.findByIdAndUpdate(
+            req.params.recipeId,
+            { $inc: { views: 1 } }
+        );
+
+        // Return the recipe with incremented views
+        recipe.views += 1;
+        res.status(200).json(recipe);
+    } catch (err) {
+        console.error("Error fetching recipe:", err);
+        res.status(500).json({ 
+            message: "Failed to fetch recipe",
             error: err.message 
         });
     }
