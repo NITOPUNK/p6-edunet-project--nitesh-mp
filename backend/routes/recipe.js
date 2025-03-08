@@ -160,6 +160,45 @@ router.get("/discover", async (req, res) => {
     }
 });
 
+// Get top recipes (must be before /:recipeId route)
+router.get("/top", async (req, res) => {
+    try {
+        // Find recipes sorted by views and search count
+        const topRecipes = await RecipesModel.aggregate([
+            {
+                $addFields: {
+                    popularity: { $add: ["$views", "$searchCount"] }
+                }
+            },
+            {
+                $sort: { popularity: -1 }
+            },
+            {
+                $limit: 5
+            },
+            {
+                $project: {
+                    title: 1,
+                    description: 1,
+                    image: 1,
+                    category: 1,
+                    createdByName: 1,
+                    views: 1,
+                    searchCount: 1
+                }
+            }
+        ]);
+
+        res.status(200).json(topRecipes);
+    } catch (err) {
+        console.error("Error fetching top recipes:", err);
+        res.status(500).json({ 
+            message: "An error occurred while fetching top recipes",
+            error: err.message 
+        });
+    }
+});
+
 // search recipe by title, category (like breakfast or lunch or dinner) or username
 router.get("/search", async (req, res) => {
     const query = req.query.query;
@@ -263,8 +302,11 @@ router.get("/savedRecipes/ids/:userId", async (req, res) => {
         const user = await User.findById(req.params.userId);
         res.status(201).json({ savedRecipes: user?.savedRecipes });
     } catch (err) {
-        console.log(err);
-        res.status(500).json(err);
+        console.error("Error fetching saved recipe IDs:", err);
+        res.status(500).json({ 
+            message: "Failed to fetch saved recipe IDs",
+            error: err.message 
+        });
     }
 });
 
@@ -293,17 +335,6 @@ router.get("/:recipeId", async (req, res) => {
             message: "Failed to fetch recipe",
             error: err.message 
         });
-    }
-});
-
-// Get top recipes
-router.get("/top", async (req, res) => {
-    try {
-        const topRecipes = await RecipesModel.find().sort({ searchCount: -1 }).limit(5); // Adjust the sorting and limit as needed
-        res.status(200).json(topRecipes);
-    } catch (err) {
-        console.log(err);
-        res.status(500).json({ message: "An error occurred while fetching top recipes" });
     }
 });
 
