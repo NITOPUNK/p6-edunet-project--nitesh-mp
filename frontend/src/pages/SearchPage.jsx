@@ -106,8 +106,16 @@ const SearchPage = () => {
                     <p className="card-text">
                       <small className="text-muted">By: {recipe.createdByName || 'Unknown'}</small>
                     </p>
+                    <div className="d-flex justify-content-between align-items-center mb-2">
+                      <small className="text-muted">
+                        <i className="bi bi-eye me-1"></i> {recipe.views || 0} views
+                      </small>
+                      <small className="text-muted">
+                        <i className="bi bi-search me-1"></i> {recipe.searchCount || 0} searches
+                      </small>
+                    </div>
                     <Link
-                      to={`/recipe/${recipe._id}`}
+                      to={`/view-recipe/${recipe._id}`}
                       className="btn btn-primary w-100"
                     >
                       View Recipe

@@ -169,6 +169,7 @@ router.get("/search", async (req, res) => {
     }
 
     try {
+        // First, find matching recipes
         const searchResult = await RecipesModel.find({
             $or: [
                 { title: { $regex: query, $options: 'i' } },
@@ -176,11 +177,18 @@ router.get("/search", async (req, res) => {
                 { createdByName: { $regex: query, $options: 'i' } },
                 { description: { $regex: query, $options: 'i' } }
             ]
-        }).select("title description image category createdByName _id");
+        }).select("title description image category createdByName _id views searchCount");
 
         if (searchResult.length === 0) {
             return res.status(200).json({ message: "No recipes found matching your search" });
         }
+
+        // Increment searchCount for all found recipes
+        const recipeIds = searchResult.map(recipe => recipe._id);
+        await RecipesModel.updateMany(
+            { _id: { $in: recipeIds } },
+            { $inc: { searchCount: 1 } }
+        );
 
         res.status(200).json(searchResult);
     } catch (err) {
@@ -195,10 +203,24 @@ router.get("/search", async (req, res) => {
 // Get a recipe by ID
 router.get("/:recipeId", async (req, res) => {
     try {
-        const result = await RecipesModel.findById(req.params.recipeId);
+        // Find and update the recipe to increment views
+        const result = await RecipesModel.findByIdAndUpdate(
+            req.params.recipeId,
+            { $inc: { views: 1 } }, // Increment views by 1
+            { new: true } // Return the updated document
+        );
+        
+        if (!result) {
+            return res.status(404).json({ message: "Recipe not found" });
+        }
+        
         res.status(200).json(result);
     } catch (err) {
-        res.status(500).json(err);
+        console.error("Error fetching recipe:", err);
+        res.status(500).json({ 
+            message: "Failed to fetch recipe",
+            error: err.message 
+        });
     }
 });
 

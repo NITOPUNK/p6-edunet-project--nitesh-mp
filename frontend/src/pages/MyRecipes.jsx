@@ -126,7 +126,7 @@ const MyRecipes = () => {
             </p>
           </div>
           <div className="d-flex justify-content-between mt-3">
-            <Link to={`/recipe/${recipe._id}`} className="btn btn-primary">
+            <Link to={`/view-recipe/${recipe._id}`} className="btn btn-primary">
               View Recipe
             </Link>
             {isCreated ? (

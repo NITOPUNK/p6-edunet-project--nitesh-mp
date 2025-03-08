@@ -119,6 +119,11 @@ const ViewRecipe = () => {
               <div className="mb-4">
                 <span className="badge bg-primary me-2">{recipe.category}</span>
                 <small className="text-muted">Created by: {recipe.createdByName}</small>
+                <div className="mt-2">
+                  <small className="text-muted">
+                    <i className="bi bi-eye me-1"></i> {recipe.views || 0} views
+                  </small>
+                </div>
               </div>
 
               <div className="mb-4">
