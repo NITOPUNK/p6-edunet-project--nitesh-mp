@@ -9,13 +9,17 @@ const router = express.Router();
 // routing all the recipe related requests
 
 
+
+
 // to add a new recipe
 router.post("/add", verifyToken, async (req, res) => {
     const { title, description, ingredients, instructions, category, image, createdBy, createdByName } = req.body;
     try {
         const newRecipe = new RecipesModel({ title, description, ingredients, instructions, category, image, createdBy, createdByName });
         await newRecipe.save()
-            .then(() => {
+            .then(async (savedRecipe) => {
+                // Add the recipe ID to the createdRecipes array of the user
+                await User.findByIdAndUpdate(createdBy, { $push: { createdRecipes: savedRecipe._id } });
                 res.json({ message: "Recipe added successfully" });
             })
             .catch((err) => {
@@ -27,6 +31,12 @@ router.post("/add", verifyToken, async (req, res) => {
         res.status(500).json({ message: "Failed to add recipe" });
     }
 });
+
+
+
+
+
+
 
 
 // update an existing recipe
