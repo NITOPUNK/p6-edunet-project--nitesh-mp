@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { useCookies } from "react-cookie";
 
@@ -7,6 +7,7 @@ const ViewRecipe = () => {
   const { id } = useParams();
   const [recipe, setRecipe] = useState(null);
   const [cookies] = useCookies(["access_token"]);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchRecipe = async () => {
@@ -22,20 +23,36 @@ const ViewRecipe = () => {
   }, [id]);
 
   const handleSaveRecipe = async () => {
-    const userId = window.localStorage.getItem("userID");
+    if (!cookies.access_token) {
+      alert("Please login to save recipes");
+      navigate("/login");
+      return;
+    }
+
+    const userID = window.localStorage.getItem("userID");
+    if (!userID) {
+      alert("User information not found. Please login again.");
+      navigate("/login");
+      return;
+    }
+
     try {
-      await axios.put("https://p6-edunet-project-nitesh-mp.onrender.com/recipe", {
-        userID: userId,
+      const response = await axios.put("https://p6-edunet-project-nitesh-mp.onrender.com/recipe", {
+        userID,
         recipeID: id
       }, {
         headers: {
           Authorization: `Bearer ${cookies.access_token}`,
         },
       });
-      alert("Recipe saved successfully!");
+      alert(response.data.message || "Recipe saved successfully!");
     } catch (error) {
       console.error("Error saving recipe:", error);
-      alert("Failed to save recipe. Please try again.");
+      if (error.response) {
+        alert(error.response.data.message || "Failed to save recipe. Please try again.");
+      } else {
+        alert("Failed to save recipe. Please check your connection and try again.");
+      }
     }
   };
 

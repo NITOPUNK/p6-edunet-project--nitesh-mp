@@ -14,20 +14,35 @@ const router = express.Router();
 router.post("/add", verifyToken, async (req, res) => {
     const { title, description, ingredients, instructions, category, image, createdBy, createdByName } = req.body;
     try {
-        const newRecipe = new RecipesModel({ title, description, ingredients, instructions, category, image, createdBy, createdByName });
-        await newRecipe.save()
-            .then(async (savedRecipe) => {
-                // Add the recipe ID to the createdRecipes array of the user
-                await User.findByIdAndUpdate(createdBy, { $push: { createdRecipes: savedRecipe._id } });
-                res.json({ message: "Recipe added successfully" });
-            })
-            .catch((err) => {
-                console.log(err);
-                res.status(500).json({ message: "Failed to add recipe" });
-            });
+        const newRecipe = new RecipesModel({ 
+            title, 
+            description, 
+            ingredients, 
+            instructions, 
+            category, 
+            image, 
+            createdBy, 
+            createdByName 
+        });
+        
+        const savedRecipe = await newRecipe.save();
+        
+        // Add the recipe ID to the user's createdRecipes array
+        await UserModel.findByIdAndUpdate(
+            createdBy, 
+            { $push: { createdRecipes: savedRecipe._id } }
+        );
+        
+        res.status(201).json({ 
+            message: "Recipe added successfully",
+            recipe: savedRecipe
+        });
     } catch (err) {
-        console.log(err);
-        res.status(500).json({ message: "Failed to add recipe" });
+        console.error("Error adding recipe:", err);
+        res.status(500).json({ 
+            message: "Failed to add recipe",
+            error: err.message 
+        });
     }
 });
 
@@ -124,14 +139,40 @@ router.get("/:recipeId", async (req, res) => {
 
 // Save a Recipe
 router.put("/", verifyToken, async (req, res) => {
-    const recipe = await RecipesModel.findById(req.body.recipeID);
-    const user = await UserModel.findById(req.body.userID);
+    const { userID, recipeID } = req.body;
+    
     try {
-        user.savedRecipes.push(recipe);
+        // Check if recipe exists
+        const recipe = await RecipesModel.findById(recipeID);
+        if (!recipe) {
+            return res.status(404).json({ message: "Recipe not found" });
+        }
+
+        // Check if user exists
+        const user = await UserModel.findById(userID);
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        // Check if recipe is already saved
+        if (user.savedRecipes.includes(recipeID)) {
+            return res.status(400).json({ message: "Recipe already saved" });
+        }
+
+        // Add recipe to user's saved recipes
+        user.savedRecipes.push(recipeID);
         await user.save();
-        res.status(201).json({ savedRecipes: user.savedRecipes });
+        
+        res.status(200).json({ 
+            message: "Recipe saved successfully",
+            savedRecipes: user.savedRecipes 
+        });
     } catch (err) {
-        res.status(500).json(err);
+        console.error("Error saving recipe:", err);
+        res.status(500).json({ 
+            message: "Failed to save recipe",
+            error: err.message 
+        });
     }
 });
 
