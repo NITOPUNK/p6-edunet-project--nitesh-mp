@@ -22,7 +22,7 @@ router.post("/add", verifyToken, async (req, res) => {
             instructions, 
             category, 
             image, 
-            createdBy: mongoose.Types.ObjectId(createdBy), 
+            createdBy: new mongoose.Types.ObjectId(createdBy), 
             createdByName 
         });
         
@@ -67,7 +67,7 @@ router.put("/save", verifyToken, async (req, res) => {
         // Check if user exists and update their savedRecipes
         const updatedUser = await UserModel.findByIdAndUpdate(
             userID,
-            { $addToSet: { savedRecipes: mongoose.Types.ObjectId(recipeID) } },
+            { $addToSet: { savedRecipes: new mongoose.Types.ObjectId(recipeID) } },
             { new: true }
         ).populate('savedRecipes');
 
