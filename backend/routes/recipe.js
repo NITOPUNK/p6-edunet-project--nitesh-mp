@@ -1,7 +1,7 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const { RecipesModel } = require('../models/recipe.js');
-const { UserModel } = require('../models/user.js');
+const User = require('../models/user.js');
 const { verifyToken } = require('./auth.js');
 
 const router = express.Router();
@@ -29,7 +29,7 @@ router.post("/add", verifyToken, async (req, res) => {
         const savedRecipe = await newRecipe.save();
         
         // Update the user's createdRecipes array
-        const updatedUser = await UserModel.findByIdAndUpdate(
+        const updatedUser = await User.findByIdAndUpdate(
             createdBy,
             { $push: { createdRecipes: savedRecipe._id } },
             { new: true }
@@ -65,7 +65,7 @@ router.put("/save", verifyToken, async (req, res) => {
         }
 
         // Check if user exists and update their savedRecipes
-        const updatedUser = await UserModel.findByIdAndUpdate(
+        const updatedUser = await User.findByIdAndUpdate(
             userID,
             { $addToSet: { savedRecipes: new mongoose.Types.ObjectId(recipeID) } },
             { new: true }
@@ -170,7 +170,7 @@ router.get("/:recipeId", async (req, res) => {
 // Get id of saved recipes
 router.get("/savedRecipes/ids/:userId", async (req, res) => {
     try {
-        const user = await UserModel.findById(req.params.userId);
+        const user = await User.findById(req.params.userId);
         res.status(201).json({ savedRecipes: user?.savedRecipes });
     } catch (err) {
         console.log(err);
@@ -181,7 +181,7 @@ router.get("/savedRecipes/ids/:userId", async (req, res) => {
 // Get saved recipes for a user
 router.get("/savedRecipes/:userId", async (req, res) => {
     try {
-        const user = await UserModel.findById(req.params.userId)
+        const user = await User.findById(req.params.userId)
             .populate('savedRecipes');
         
         if (!user) {
@@ -203,7 +203,7 @@ router.get("/savedRecipes/:userId", async (req, res) => {
 // Get created recipes for a user
 router.get("/createdRecipes/:userId", async (req, res) => {
     try {
-        const user = await UserModel.findById(req.params.userId)
+        const user = await User.findById(req.params.userId)
             .populate('createdRecipes');
         
         if (!user) {
