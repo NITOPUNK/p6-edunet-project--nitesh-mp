@@ -2,7 +2,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const { RecipesModel } = require('../models/recipe.js');
 const { UserModel } = require('../models/user.js');
-const { verifyToken } = require('./auth.js'); // Import verifyToken from the exported object
+const { verifyToken } = require('./auth.js');
 
 const router = express.Router();
 
@@ -14,6 +14,7 @@ const router = express.Router();
 router.post("/add", verifyToken, async (req, res) => {
     const { title, description, ingredients, instructions, category, image, createdBy, createdByName } = req.body;
     try {
+        // Create and save the new recipe
         const newRecipe = new RecipesModel({ 
             title, 
             description, 
@@ -21,21 +22,27 @@ router.post("/add", verifyToken, async (req, res) => {
             instructions, 
             category, 
             image, 
-            createdBy, 
+            createdBy: mongoose.Types.ObjectId(createdBy), 
             createdByName 
         });
         
         const savedRecipe = await newRecipe.save();
         
-        // Add the recipe ID to the user's createdRecipes array
-        await UserModel.findByIdAndUpdate(
-            createdBy, 
-            { $push: { createdRecipes: savedRecipe._id } }
+        // Update the user's createdRecipes array
+        const updatedUser = await UserModel.findByIdAndUpdate(
+            createdBy,
+            { $push: { createdRecipes: savedRecipe._id } },
+            { new: true }
         );
+
+        if (!updatedUser) {
+            throw new Error("User not found");
+        }
         
         res.status(201).json({ 
             message: "Recipe added successfully",
-            recipe: savedRecipe
+            recipe: savedRecipe,
+            userRecipes: updatedUser.createdRecipes
         });
     } catch (err) {
         console.error("Error adding recipe:", err);
@@ -57,24 +64,20 @@ router.put("/save", verifyToken, async (req, res) => {
             return res.status(404).json({ message: "Recipe not found" });
         }
 
-        // Check if user exists
-        const user = await UserModel.findById(userID);
-        if (!user) {
+        // Check if user exists and update their savedRecipes
+        const updatedUser = await UserModel.findByIdAndUpdate(
+            userID,
+            { $addToSet: { savedRecipes: mongoose.Types.ObjectId(recipeID) } },
+            { new: true }
+        ).populate('savedRecipes');
+
+        if (!updatedUser) {
             return res.status(404).json({ message: "User not found" });
         }
 
-        // Check if recipe is already saved
-        if (user.savedRecipes.includes(recipeID)) {
-            return res.status(400).json({ message: "Recipe already saved" });
-        }
-
-        // Add recipe to user's saved recipes
-        user.savedRecipes.push(recipeID);
-        await user.save();
-        
         res.status(200).json({ 
             message: "Recipe saved successfully",
-            savedRecipes: user.savedRecipes 
+            savedRecipes: updatedUser.savedRecipes
         });
     } catch (err) {
         console.error("Error saving recipe:", err);
@@ -175,19 +178,47 @@ router.get("/savedRecipes/ids/:userId", async (req, res) => {
     }
 });
 
-// Get saved recipes
+// Get saved recipes for a user
 router.get("/savedRecipes/:userId", async (req, res) => {
     try {
-        const user = await UserModel.findById(req.params.userId);
-        const savedRecipes = await RecipesModel.find({
-            _id: { $in: user.savedRecipes },
-        });
+        const user = await UserModel.findById(req.params.userId)
+            .populate('savedRecipes');
+        
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
 
-        console.log(savedRecipes);
-        res.status(201).json({ savedRecipes });
+        res.status(200).json({ 
+            savedRecipes: user.savedRecipes 
+        });
     } catch (err) {
-        console.log(err);
-        res.status(500).json(err);
+        console.error("Error fetching saved recipes:", err);
+        res.status(500).json({ 
+            message: "Failed to fetch saved recipes",
+            error: err.message 
+        });
+    }
+});
+
+// Get created recipes for a user
+router.get("/createdRecipes/:userId", async (req, res) => {
+    try {
+        const user = await UserModel.findById(req.params.userId)
+            .populate('createdRecipes');
+        
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        res.status(200).json({ 
+            createdRecipes: user.createdRecipes 
+        });
+    } catch (err) {
+        console.error("Error fetching created recipes:", err);
+        res.status(500).json({ 
+            message: "Failed to fetch created recipes",
+            error: err.message 
+        });
     }
 });
 
