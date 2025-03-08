@@ -163,23 +163,32 @@ router.get("/discover", async (req, res) => {
 // search recipe by title, category (like breakfast or lunch or dinner) or username
 router.get("/search", async (req, res) => {
     const query = req.query.query;
+
+    if (!query) {
+        return res.status(400).json({ message: "Search query is required" });
+    }
+
     try {
         const searchResult = await RecipesModel.find({
             $or: [
                 { title: { $regex: query, $options: 'i' } },
                 { category: { $regex: query, $options: 'i' } },
-                { username: { $regex: query, $options: 'i' } }
+                { createdByName: { $regex: query, $options: 'i' } },
+                { description: { $regex: query, $options: 'i' } }
             ]
-        }).select("title image createdByName updatedAt instructions");
+        }).select("title description image category createdByName _id");
 
-        // check whether search query exists
         if (searchResult.length === 0) {
-            res.json({ message: "No search result found" });
-        } else {
-            res.json(searchResult);
+            return res.status(200).json({ message: "No recipes found matching your search" });
         }
+
+        res.status(200).json(searchResult);
     } catch (err) {
-        console.log(err);
+        console.error("Search error:", err);
+        res.status(500).json({ 
+            message: "An error occurred while searching for recipes",
+            error: err.message 
+        });
     }
 });
 
