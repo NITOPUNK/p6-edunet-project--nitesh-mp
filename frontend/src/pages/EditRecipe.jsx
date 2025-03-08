@@ -6,11 +6,11 @@ import { useCookies } from "react-cookie";
 const EditRecipe = () => {
   const [recipeData, setRecipeData] = useState({
     title: "",
-    description: "", // Add description to the state
-    ingredients: "",
+    description: "",
+    ingredients: [],
     instructions: "",
     category: "",
-    image: "", // Add image to the state
+    image: "",
   });
   const [cookies] = useCookies(["access_token"]);
   const navigate = useNavigate();
@@ -20,14 +20,20 @@ const EditRecipe = () => {
     const fetchRecipe = async () => {
       try {
         const response = await axios.get(`https://p6-edunet-project-nitesh-mp.onrender.com/recipe/${id}`);
-        setRecipeData(response.data);
+        const recipe = response.data;
+        setRecipeData({
+          ...recipe,
+          ingredients: Array.isArray(recipe.ingredients) ? recipe.ingredients.join(", ") : ""
+        });
       } catch (error) {
         console.error("Error fetching recipe:", error);
+        alert("Failed to fetch recipe details");
+        navigate("/my-recipes");
       }
     };
 
     fetchRecipe();
-  }, [id]);
+  }, [id, navigate]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -38,29 +44,34 @@ const EditRecipe = () => {
     e.preventDefault();
 
     const recipe = {
+      id,
       title: recipeData.title,
-      description: recipeData.description, // Include description
-      ingredients: recipeData.ingredients.split(","),
+      description: recipeData.description,
+      ingredients: recipeData.ingredients.split(",").map(item => item.trim()).filter(item => item),
       instructions: recipeData.instructions,
       category: recipeData.category,
       image: recipeData.image,
-      createdBy: window.localStorage.getItem("userID"),
-      createdByName: window.localStorage.getItem("username"),
+      username: window.localStorage.getItem("username")
     };
 
     try {
-      await axios.put(`https://p6-edunet-project-nitesh-mp.onrender.com/recipe/${id}`, recipe, {
+      await axios.post("https://p6-edunet-project-nitesh-mp.onrender.com/recipe/update", recipe, {
         headers: {
           Authorization: `Bearer ${cookies.access_token}`,
         },
       });
       alert("Recipe updated successfully!");
-      navigate("/");
+      navigate("/my-recipes");
     } catch (error) {
       console.error("Error updating recipe:", error);
       alert("Failed to update recipe. Please try again.");
     }
   };
+
+  if (!cookies.access_token) {
+    navigate("/login");
+    return null;
+  }
 
   return (
     <div className="container mt-5">
@@ -103,7 +114,7 @@ const EditRecipe = () => {
             onChange={handleChange}
             required
             rows="4"
-            placeholder="List ingredients separated by commas"
+            placeholder="List ingredients separated by commas (e.g., 2 cups flour, 1 cup sugar, 3 eggs)"
           />
         </div>
 
@@ -141,7 +152,7 @@ const EditRecipe = () => {
 
         {/* Image URL */}
         <div className="mb-3">
-          <label className="form-label">Paste Image URL</label>
+          <label className="form-label">Image URL</label>
           <input
             type="text"
             className="form-control"
@@ -152,10 +163,14 @@ const EditRecipe = () => {
           />
         </div>
 
-        {/* Submit Button */}
-        <button type="submit" className="btn btn-primary w-100">
-          Update Recipe
-        </button>
+        <div className="d-flex justify-content-between">
+          <button type="button" className="btn btn-secondary" onClick={() => navigate("/my-recipes")}>
+            Cancel
+          </button>
+          <button type="submit" className="btn btn-primary">
+            Update Recipe
+          </button>
+        </div>
       </form>
     </div>
   );

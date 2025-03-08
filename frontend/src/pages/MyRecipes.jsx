@@ -12,6 +12,43 @@ const MyRecipes = () => {
   const navigate = useNavigate();
   const userID = window.localStorage.getItem("userID");
 
+  const fetchRecipes = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      // Fetch saved recipes
+      const savedResponse = await axios.get(
+        `https://p6-edunet-project-nitesh-mp.onrender.com/recipe/savedRecipes/${userID}`,
+        {
+          headers: {
+            Authorization: `Bearer ${cookies.access_token}`,
+          },
+        }
+      );
+      setSavedRecipes(savedResponse.data.savedRecipes || []);
+
+      // Fetch created recipes
+      const createdResponse = await axios.get(
+        `https://p6-edunet-project-nitesh-mp.onrender.com/recipe/createdRecipes/${userID}`,
+        {
+          headers: {
+            Authorization: `Bearer ${cookies.access_token}`,
+          },
+        }
+      );
+      setCreatedRecipes(createdResponse.data.createdRecipes || []);
+    } catch (error) {
+      console.error("Error fetching recipes:", error);
+      setError("Failed to fetch recipes. Please try again later.");
+      if (error.response?.status === 401) {
+        alert("Please login again");
+        navigate("/login");
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
     // Check authentication
     if (!cookies.access_token || !userID) {
@@ -19,43 +56,6 @@ const MyRecipes = () => {
       navigate("/login");
       return;
     }
-
-    const fetchRecipes = async () => {
-      setLoading(true);
-      setError(null);
-      try {
-        // Fetch saved recipes
-        const savedResponse = await axios.get(
-          `https://p6-edunet-project-nitesh-mp.onrender.com/recipe/savedRecipes/${userID}`,
-          {
-            headers: {
-              Authorization: `Bearer ${cookies.access_token}`,
-            },
-          }
-        );
-        setSavedRecipes(savedResponse.data.savedRecipes || []);
-
-        // Fetch created recipes
-        const createdResponse = await axios.get(
-          `https://p6-edunet-project-nitesh-mp.onrender.com/recipe/createdRecipes/${userID}`,
-          {
-            headers: {
-              Authorization: `Bearer ${cookies.access_token}`,
-            },
-          }
-        );
-        setCreatedRecipes(createdResponse.data.createdRecipes || []);
-      } catch (error) {
-        console.error("Error fetching recipes:", error);
-        setError("Failed to fetch recipes. Please try again later.");
-        if (error.response?.status === 401) {
-          alert("Please login again");
-          navigate("/login");
-        }
-      } finally {
-        setLoading(false);
-      }
-    };
 
     fetchRecipes();
   }, [cookies.access_token, userID, navigate]);
@@ -79,7 +79,30 @@ const MyRecipes = () => {
     }
   };
 
-  const RecipeCard = ({ recipe, isCreated = false }) => (
+  const handleRemoveSaved = async (recipeId) => {
+    try {
+      await axios.put(
+        "https://p6-edunet-project-nitesh-mp.onrender.com/recipe/removeSaved",
+        {
+          userID,
+          recipeID: recipeId
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${cookies.access_token}`,
+          },
+        }
+      );
+      // Remove the recipe from saved recipes list
+      setSavedRecipes(prev => prev.filter(recipe => recipe._id !== recipeId));
+      alert("Recipe removed from saved recipes");
+    } catch (error) {
+      console.error("Error removing saved recipe:", error);
+      alert("Failed to remove recipe from saved recipes");
+    }
+  };
+
+  const RecipeCard = ({ recipe, isCreated = false, onRemoveSaved }) => (
     <div className="col-md-4 mb-4">
       <div className="card h-100 shadow">
         <img
@@ -106,7 +129,7 @@ const MyRecipes = () => {
             <Link to={`/recipe/${recipe._id}`} className="btn btn-primary">
               View Recipe
             </Link>
-            {isCreated && (
+            {isCreated ? (
               <div className="btn-group">
                 <Link to={`/edit-recipe/${recipe._id}`} className="btn btn-warning">
                   Edit
@@ -118,6 +141,13 @@ const MyRecipes = () => {
                   Delete
                 </button>
               </div>
+            ) : (
+              <button
+                onClick={() => onRemoveSaved(recipe._id)}
+                className="btn btn-danger"
+              >
+                Remove
+              </button>
             )}
           </div>
         </div>
@@ -186,7 +216,11 @@ const MyRecipes = () => {
         ) : (
           <div className="row">
             {savedRecipes.map((recipe) => (
-              <RecipeCard key={recipe._id} recipe={recipe} />
+              <RecipeCard 
+                key={recipe._id} 
+                recipe={recipe} 
+                onRemoveSaved={handleRemoveSaved}
+              />
             ))}
           </div>
         )}

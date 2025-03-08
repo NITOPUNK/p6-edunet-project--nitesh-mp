@@ -88,8 +88,34 @@ router.put("/save", verifyToken, async (req, res) => {
     }
 });
 
+// Remove a saved recipe
+router.put("/removeSaved", verifyToken, async (req, res) => {
+    const { userID, recipeID } = req.body;
+    
+    try {
+        // Check if user exists and update their savedRecipes
+        const updatedUser = await User.findByIdAndUpdate(
+            userID,
+            { $pull: { savedRecipes: recipeID } },
+            { new: true }
+        );
 
+        if (!updatedUser) {
+            return res.status(404).json({ message: "User not found" });
+        }
 
+        res.status(200).json({ 
+            message: "Recipe removed from saved recipes",
+            savedRecipes: updatedUser.savedRecipes
+        });
+    } catch (err) {
+        console.error("Error removing saved recipe:", err);
+        res.status(500).json({ 
+            message: "Failed to remove recipe from saved recipes",
+            error: err.message 
+        });
+    }
+});
 
 // update an existing recipe
 router.post("/update", verifyToken, async (req, res) => {
