@@ -74,9 +74,10 @@ const Navbar = () => {
             <input
               className="form-control me-2"
               type="search"
-              placeholder="Search recipes..."
+              placeholder="Search by recipe , category , user"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
+              style={{ minWidth: "300px" }}
             />
             <button className="btn btn-outline-light" type="submit">
               Search
