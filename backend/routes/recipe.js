@@ -160,7 +160,7 @@ router.get("/discover", async (req, res) => {
     }
 });
 
-// Get top recipes (must be before /:recipeId route)
+// Get top recipes 
 router.get("/top", async (req, res) => {
     try {
         // Find recipes sorted by views and search count
@@ -199,7 +199,7 @@ router.get("/top", async (req, res) => {
     }
 });
 
-// search recipe by title, category (like breakfast or lunch or dinner) or username
+// search recipe by title, category (like breakfast or lunch or dinner),description or username
 router.get("/search", async (req, res) => {
     const query = req.query.query;
 
