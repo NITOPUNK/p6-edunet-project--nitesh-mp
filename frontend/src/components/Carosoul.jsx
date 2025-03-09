@@ -19,6 +19,7 @@ const Carosoul = () => {
 
   return (
     <div id="recipeCarousel" className="carousel slide mt-4" data-bs-ride="carousel">
+       <h2 className="text-center mb-4">Top Recipes</h2>
       <div className="carousel-inner">
         {topRecipes.map((recipe, index) => (
           <div key={recipe._id} className={`carousel-item ${index === 0 ? "active" : ""}`}>
