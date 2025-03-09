@@ -1,8 +1,8 @@
 const express = require('express');
 const mongoose = require('mongoose');
-const { RecipesModel } = require('../models/recipe.js');
-const User = require('../models/user.js');
-const { verifyToken } = require('./auth.js');
+const RecipesModel = require('../models/recipe');
+const User = require('../models/user');
+const { verifyToken } = require('./auth');
 
 const router = express.Router();
 

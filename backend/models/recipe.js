@@ -11,6 +11,7 @@ const RecipeSchema = new mongoose.Schema({
     createdByName: { type: String },
     views: { type: Number, default: 0 },
     searchCount: { type: Number, default: 0 }
-});
+}, { timestamps: true });
 
-module.exports = mongoose.model("Recipes", RecipeSchema);
+const RecipesModel = mongoose.model("Recipes", RecipeSchema);
+module.exports = RecipesModel;
