@@ -50,7 +50,6 @@ const MyRecipes = () => {
   };
 
   useEffect(() => {
-    // Check authentication
     if (!cookies.access_token || !userID) {
       alert("Please login to view your recipes");
       navigate("/login");

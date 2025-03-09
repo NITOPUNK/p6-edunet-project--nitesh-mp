@@ -9,7 +9,6 @@ const Navbar = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Check both cookie and username on component mount and when cookies change
     const storedUsername = window.localStorage.getItem("username");
     if (cookies.access_token && storedUsername) {
       setUsername(storedUsername);
@@ -39,7 +38,15 @@ const Navbar = () => {
   return (
     <nav className="navbar navbar-expand-lg navbar-dark bg-dark">
       <div className="container">
-        <Link className="navbar-brand" to="/">RecipeShr</Link>
+        <Link to="/" className="navbar-brand d-flex align-items-center">
+          <img 
+            src="/android-chrome-192x192.png" 
+            alt="RecipeShr Logo" 
+            height="30" 
+            className="me-2"
+          />
+          RecipeShr
+        </Link>
         <button 
           className="navbar-toggler" 
           type="button" 
@@ -69,15 +76,14 @@ const Navbar = () => {
             )}
           </ul>
 
-          {/* Search Bar */}
           <form className="d-flex" onSubmit={handleSearch}>
             <input
               className="form-control me-2"
               type="search"
-              placeholder="Search by recipe , category , user"
+              placeholder="Search by recipe, category, user, description"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              style={{ minWidth: "300px" }}
+              style={{ minWidth: "350px" }}
             />
             <button className="btn btn-outline-light" type="submit">
               Search

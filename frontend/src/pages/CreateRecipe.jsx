@@ -4,20 +4,20 @@ import { useNavigate } from "react-router-dom";
 import { useCookies } from "react-cookie";
 
 const CreateRecipe = () => {
-  const [recipeData, setRecipeData] = useState({
+  const [recipe, setRecipe] = useState({
     title: "",
-    description: "", // Add description to the state
+    description: "",
     ingredients: "",
     instructions: "",
     category: "",
-    image: "", // Add image to the state
+    image: ""
   });
   const [cookies] = useCookies(["access_token"]);
   const navigate = useNavigate();
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setRecipeData({ ...recipeData, [name]: value });
+    setRecipe({ ...recipe, [name]: value });
   };
 
   const handleSubmit = async (e) => {
@@ -39,12 +39,12 @@ const CreateRecipe = () => {
     }
 
     const recipe = {
-      title: recipeData.title,
-      description: recipeData.description,
-      ingredients: recipeData.ingredients.split(",").map(item => item.trim()),
-      instructions: recipeData.instructions,
-      category: recipeData.category,
-      image: recipeData.image,
+      title: recipe.title,
+      description: recipe.description,
+      ingredients: recipe.ingredients.split(",").map(item => item.trim()),
+      instructions: recipe.instructions,
+      category: recipe.category,
+      image: recipe.image,
       createdBy: userID,
       createdByName: username,
     };
@@ -78,7 +78,7 @@ const CreateRecipe = () => {
             type="text"
             className="form-control"
             name="title"
-            value={recipeData.title}
+            value={recipe.title}
             onChange={handleChange}
             required
           />
@@ -90,7 +90,7 @@ const CreateRecipe = () => {
           <textarea
             className="form-control"
             name="description"
-            value={recipeData.description}
+            value={recipe.description}
             onChange={handleChange}
             required
             rows="3"
@@ -104,7 +104,7 @@ const CreateRecipe = () => {
           <textarea
             className="form-control"
             name="ingredients"
-            value={recipeData.ingredients}
+            value={recipe.ingredients}
             onChange={handleChange}
             required
             rows="4"
@@ -118,7 +118,7 @@ const CreateRecipe = () => {
           <textarea
             className="form-control"
             name="instructions"
-            value={recipeData.instructions}
+            value={recipe.instructions}
             onChange={handleChange}
             required
             rows="5"
@@ -132,7 +132,7 @@ const CreateRecipe = () => {
           <select
             className="form-select"
             name="category"
-            value={recipeData.category}
+            value={recipe.category}
             onChange={handleChange}
             required
           >
@@ -151,7 +151,7 @@ const CreateRecipe = () => {
             type="text"
             className="form-control"
             name="image"
-            value={recipeData.image}
+            value={recipe.image}
             onChange={handleChange}
             placeholder="Paste image URL"
           />
