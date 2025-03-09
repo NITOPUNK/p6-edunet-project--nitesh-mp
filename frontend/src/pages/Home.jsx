@@ -6,7 +6,6 @@ import Carosoul from '../components/Carosoul';
 const Home = () => {
   const [recipes, setRecipes] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
 
   useEffect(() => {
     const fetchRecipes = async () => {
@@ -15,7 +14,6 @@ const Home = () => {
         setRecipes(response.data);
       } catch (error) {
         console.error("Error fetching recipes:", error);
-        setError("Failed to load recipes");
       } finally {
         setLoading(false);
       }
@@ -24,90 +22,70 @@ const Home = () => {
     fetchRecipes();
   }, []);
 
-  const LoadingCard = () => (
-    <div className="col-md-4 mb-4">
-      <div className="card shadow-sm" aria-hidden="true">
-        <div className="placeholder-glow">
-          <div className="placeholder" style={{ height: "200px" }}></div>
-        </div>
-        <div className="card-body">
-          <h5 className="card-title placeholder-glow">
-            <span className="placeholder col-6"></span>
-          </h5>
-          <p className="card-text placeholder-glow">
-            <span className="placeholder col-7"></span>
-            <span className="placeholder col-4"></span>
-            <span className="placeholder col-4"></span>
-          </p>
-          <div className="placeholder-glow">
-            <span className="placeholder col-6"></span>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-
   return (
     <>
       <Carosoul />
-      <div className="container mt-5">
+      <div className="container mt-4">
         <h2 className="text-center mb-4">Discover Recipes</h2>
         
-        {error && (
-          <div className="alert alert-danger" role="alert">
-            {error}
+        {loading ? (
+          <div className="row">
+            {[1, 2, 3].map((placeholder) => (
+              <div className="col-md-4" key={placeholder}>
+                <div className="card shadow-sm mb-4">
+                  <div className="card-body" style={{ height: "400px" }}>
+                    <div className="d-flex align-items-center justify-content-center h-100">
+                      <div className="text-center">
+                        <div className="spinner-border text-primary mb-3" role="status">
+                          <span className="visually-hidden">Loading...</span>
+                        </div>
+                        <p className="text-muted mb-0">Loading recipes...</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
-        )}
-
-        <div className="row">
-          {loading ? (
-            <>
-              <LoadingCard />
-              <LoadingCard />
-              <LoadingCard />
-              <LoadingCard />
-              <LoadingCard />
-              <LoadingCard />
-            </>
-          ) : (
-            recipes.map((recipe) => (
-              <div className="col-md-4 mb-4" key={recipe._id}>
-                <div className="card shadow-sm h-100">
+        ) : (
+          <div className="row">
+            {recipes.map((recipe) => (
+              <div className="col-md-4" key={recipe._id}>
+                <div className="card shadow-sm mb-4">
                   <img 
-                    src={recipe.image || 'https://via.placeholder.com/300x200?text=No+Image'} 
+                    src={recipe.image || 'https://via.placeholder.com/400x300?text=No+Image'} 
                     className="card-img-top" 
                     alt={recipe.title}
                     style={{ height: "200px", objectFit: "cover" }}
                     onError={(e) => {
-                      e.target.src = 'https://via.placeholder.com/300x200?text=No+Image';
+                      e.target.src = 'https://via.placeholder.com/400x300?text=No+Image';
                     }}
                   />
-                  <div className="card-body d-flex flex-column">
+                  <div className="card-body">
                     <h5 className="card-title">{recipe.title}</h5>
-                    <p className="card-text flex-grow-1">{recipe.description}</p>
-                    <div className="mt-auto">
-                      <div className="d-flex justify-content-between align-items-center mb-2">
-                        <small className="text-muted">
-                          <i className="bi bi-eye me-1"></i> {recipe.views || 0} views
-                        </small>
-                        <span className="badge bg-primary">{recipe.category}</span>
-                      </div>
-                      <Link 
-                        to={`/view-recipe/${recipe._id}`} 
-                        className="btn btn-primary w-100"
-                      >
-                        View Recipe
-                      </Link>
+                    <p className="card-text text-muted mb-2">{recipe.category}</p>
+                    <p className="card-text">
+                      {recipe.description.length > 100
+                        ? `${recipe.description.substring(0, 100)}...`
+                        : recipe.description}
+                    </p>
+                    <div className="d-flex justify-content-between align-items-center">
+                      <small className="text-muted">
+                        <i className="bi bi-eye me-1"></i> {recipe.views || 0} views
+                      </small>
+                      <small className="text-muted">By {recipe.createdByName}</small>
                     </div>
                   </div>
-                  <div className="card-footer text-muted">
-                    Created by {recipe.createdByName}
+                  <div className="card-footer bg-transparent">
+                    <Link to={`/view-recipe/${recipe._id}`} className="btn btn-primary w-100">
+                      View Recipe
+                    </Link>
                   </div>
                 </div>
               </div>
-            ))
-          )}
-        </div>
+            ))}
+          </div>
+        )}
       </div>
     </>
   );

@@ -5,7 +5,6 @@ import { Link } from "react-router-dom";
 const Carosoul = () => {
   const [topRecipes, setTopRecipes] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
 
   useEffect(() => {
     const fetchTopRecipes = async () => {
@@ -14,7 +13,6 @@ const Carosoul = () => {
         setTopRecipes(response.data);
       } catch (error) {
         console.error("Error fetching top recipes:", error);
-        setError("Failed to load top recipes");
       } finally {
         setLoading(false);
       }
@@ -26,29 +24,15 @@ const Carosoul = () => {
   if (loading) {
     return (
       <div className="container mt-4">
-        <div className="card" aria-hidden="true">
-          <div className="card-body">
-            <h5 className="card-title placeholder-glow">
-              <span className="placeholder col-6"></span>
-            </h5>
-            <p className="card-text placeholder-glow">
-              <span className="placeholder col-7"></span>
-              <span className="placeholder col-4"></span>
-              <span className="placeholder col-4"></span>
-              <span className="placeholder col-6"></span>
-              <span className="placeholder col-8"></span>
-            </p>
+        <div className="card" style={{ height: "400px" }}>
+          <div className="card-body d-flex align-items-center justify-content-center">
+            <div className="text-center">
+              <div className="spinner-border text-primary mb-3" role="status">
+                <span className="visually-hidden">Loading...</span>
+              </div>
+              <p className="text-muted mb-0">Loading top recipes...</p>
+            </div>
           </div>
-        </div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="container mt-4">
-        <div className="alert alert-danger" role="alert">
-          {error}
         </div>
       </div>
     );
@@ -75,7 +59,10 @@ const Carosoul = () => {
               />
               <div className="carousel-caption">
                 <h5>{recipe.title}</h5>
-                <p>{recipe.category}</p>
+                <p className="mb-0">{recipe.category}</p>
+                <small className="text-white">
+                  <i className="bi bi-eye me-1"></i> {recipe.views || 0} views
+                </small>
               </div>
             </Link>
           </div>
